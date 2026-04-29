@@ -19,12 +19,12 @@ export function StampSlot({ stamp, collected, justCollected }: Props) {
         ].join(' ')}
       >
         {collected ? (
-          <picture>
+          <picture class="block w-[88%] h-[88%]">
             <source srcset={stamp.webp} type="image/webp" />
             <img
               src={stamp.png}
               alt={tr.stamps[stamp.id]}
-              class="w-[88%] h-[88%] object-contain mix-blend-multiply"
+              class="w-full h-full object-contain"
               draggable={false}
             />
           </picture>

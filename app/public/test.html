@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Stamp Rally — Test QR Codes</title>
+    <style>
+      :root {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        color: #1a1a1a;
+        background: #f5efe2;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 32px 16px 64px;
+        max-width: 1100px;
+        margin-inline: auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        margin: 0 0 6px;
+      }
+      .warn {
+        display: inline-block;
+        background: #fde68a;
+        color: #78350f;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      .lede {
+        color: #4b5563;
+        font-size: 14px;
+        margin: 12px auto 0;
+        max-width: 520px;
+        line-height: 1.5;
+      }
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      }
+      .card {
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      .card h2 {
+        margin: 0 0 4px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .card .desc {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 14px;
+        min-height: 32px;
+      }
+      .qr {
+        width: 220px;
+        height: 220px;
+        background: white;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 12px;
+      }
+      .qr canvas,
+      .qr svg {
+        display: block;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      .url {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        color: #6b7280;
+        word-break: break-all;
+        background: #f3f4f6;
+        padding: 6px 8px;
+        border-radius: 6px;
+        width: 100%;
+      }
+      .url a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 999px;
+        margin-bottom: 8px;
+      }
+      .badge.red {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge.blue {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .badge.gray {
+        background: #f3f4f6;
+        color: #374151;
+      }
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 11px;
+        color: #9ca3af;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>EVO Japan 2026 — Rally Test QR Codes</h1>
+      <div class="warn">Delete <code>public/test.html</code> before launch</div>
+      <p class="lede">
+        Scan with your phone camera. Each code opens the live deploy with the
+        right URL parameter. State is shared across all of them via
+        <code>localStorage</code> on the same device.
+      </p>
+    </header>
+
+    <div class="grid" id="grid"></div>
+
+    <footer>EVO JAPAN 2026 · BEAK &amp; BONE · HAWK.GG</footer>
+
+    <script type="module">
+      import QRCode from 'https://esm.sh/qrcode@1.5.4'
+
+      const ORIGIN = 'https://digital-stamp-silk.vercel.app'
+
+      const items = [
+        {
+          title: 'Station 1 — Beak & Bone',
+          desc: 'Booth entrance, awarded on first scan.',
+          badge: { label: 'STAMP · RED', cls: 'red' },
+          path: '/?s=1',
+        },
+        {
+          title: 'Station 2 — Play! Arcade',
+          desc: 'Awarded after playing the demo.',
+          badge: { label: 'STAMP · RED', cls: 'red' },
+          path: '/?s=2',
+        },
+        {
+          title: 'Hero of the Hill (Staff)',
+          desc: 'Staff scans on the user’s behalf when they clear the challenge.',
+          badge: { label: 'STAFF · BLUE', cls: 'blue' },
+          path: '/?hero=kachidoki-7Kz9pQ',
+        },
+        {
+          title: 'Reset',
+          desc: 'Clears localStorage and returns to an empty grid.',
+          badge: { label: 'DEBUG', cls: 'gray' },
+          path: '/?reset=1',
+        },
+        {
+          title: 'Home',
+          desc: 'No params. Loads whatever state is in localStorage.',
+          badge: { label: 'PLAIN', cls: 'gray' },
+          path: '/',
+        },
+      ]
+
+      const grid = document.getElementById('grid')
+
+      for (const item of items) {
+        const url = ORIGIN + item.path
+        const card = document.createElement('div')
+        card.className = 'card'
+        card.innerHTML = `
+          <span class="badge ${item.badge.cls}">${item.badge.label}</span>
+          <h2>${item.title}</h2>
+          <div class="desc">${item.desc}</div>
+          <div class="qr"><canvas></canvas></div>
+          <div class="url"><a href="${url}" target="_blank" rel="noopener">${url}</a></div>
+        `
+        grid.appendChild(card)
+        const canvas = card.querySelector('canvas')
+        QRCode.toCanvas(canvas, url, {
+          width: 440,
+          margin: 1,
+          color: { dark: '#1a1a1a', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        })
+      }
+    </script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
-import { useRef, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 import { STAMPS } from '../stamps'
-import { t } from '../i18n'
+import { t, lang } from '../i18n'
 import { LangToggle } from './LangToggle'
 import { captureToBlob, downloadBlob, shareBlob } from '../lib/capture'
 import { resetAll } from '../state'
@@ -8,7 +8,9 @@ import { resetAll } from '../state'
 export function CompletionScreen() {
   const tr = t()
   const cardRef = useRef<HTMLDivElement>(null)
+  const blobRef = useRef<Blob | null>(null)
   const [busy, setBusy] = useState<'idle' | 'saving' | 'sharing'>('idle')
+  const [ready, setReady] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   function flash(msg: string) {
@@ -16,11 +18,38 @@ export function CompletionScreen() {
     setTimeout(() => setToast(null), 1800)
   }
 
+  useEffect(() => {
+    let cancelled = false
+    blobRef.current = null
+    setReady(false)
+    const run = async () => {
+      if (!cardRef.current) return
+      try {
+        await (document as Document & { fonts?: { ready: Promise<unknown> } })
+          .fonts?.ready
+        const blob = await captureToBlob(cardRef.current)
+        if (cancelled) return
+        blobRef.current = blob
+        setReady(true)
+      } catch (e) {
+        console.error('capture pre-render failed', e)
+      }
+    }
+    const handle = window.requestAnimationFrame(() => run())
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(handle)
+    }
+  }, [lang.value])
+
   async function handleSave() {
-    if (!cardRef.current || busy !== 'idle') return
+    if (busy !== 'idle') return
     setBusy('saving')
     try {
-      const blob = await captureToBlob(cardRef.current)
+      const blob = blobRef.current ?? (cardRef.current
+        ? await captureToBlob(cardRef.current)
+        : null)
+      if (!blob) throw new Error('no blob')
       downloadBlob(blob, 'evo-japan-2026-rally.png')
       flash(tr.saved)
     } catch (e) {
@@ -32,10 +61,14 @@ export function CompletionScreen() {
   }
 
   async function handleShare() {
-    if (!cardRef.current || busy !== 'idle') return
+    if (busy !== 'idle') return
+    const blob = blobRef.current
+    if (!blob) {
+      flash(tr.saving)
+      return
+    }
     setBusy('sharing')
     try {
-      const blob = await captureToBlob(cardRef.current)
       const result = await shareBlob(
         blob,
         'evo-japan-2026-rally.png',
@@ -80,7 +113,7 @@ export function CompletionScreen() {
             </div>
           </div>
 
-          <div class="text-center mb-1">
+          <div class="text-center mb-3">
             <h1 class="font-display text-3xl sm:text-4xl font-black text-stampRed tracking-tight leading-none">
               {tr.completionTitle}
             </h1>
@@ -95,12 +128,12 @@ export function CompletionScreen() {
                 key={s.id}
                 class="aspect-square rounded-xl border border-black/10 bg-white/40 overflow-hidden flex items-center justify-center"
               >
-                <picture>
+                <picture class="block w-[88%] h-[88%]">
                   <source srcset={s.webp} type="image/webp" />
                   <img
                     src={s.png}
                     alt={tr.stamps[s.id]}
-                    class="w-[88%] h-[88%] object-contain mix-blend-multiply"
+                    class="w-full h-full object-contain"
                     draggable={false}
                     crossOrigin="anonymous"
                   />
@@ -120,10 +153,10 @@ export function CompletionScreen() {
           <button
             type="button"
             onClick={handleShare}
-            disabled={busy !== 'idle'}
+            disabled={busy !== 'idle' || !ready}
             class="w-full bg-stampRed text-white font-bold rounded-full py-4 text-base active:opacity-80 disabled:opacity-50"
           >
-            {busy === 'sharing' ? tr.saving : tr.share}
+            {busy === 'sharing' || !ready ? tr.saving : tr.share}
           </button>
           <button
             type="button"
