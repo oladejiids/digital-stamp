@@ -17,24 +17,28 @@ export default {
         'stamp-press': {
           '0%': {
             opacity: '0',
-            filter: 'blur(4px)',
-            transform: 'translateY(-40%) scale(1.5) rotate(-16deg)',
+            filter: 'blur(3px)',
+            transform: 'translateY(-38%) scale(1.45) rotate(-14deg)',
+            animationTimingFunction: 'cubic-bezier(0.22, 0.6, 0.4, 0.95)',
           },
-          '30%': {
+          '25%': {
             opacity: '1',
-            filter: 'blur(1px)',
-            transform: 'translateY(-15%) scale(1.3) rotate(-10deg)',
+            filter: 'blur(1.5px)',
+            transform: 'translateY(-18%) scale(1.25) rotate(-8deg)',
+            animationTimingFunction: 'cubic-bezier(0.4, 0.1, 0.5, 1)',
           },
           '50%': {
-            opacity: '1',
             filter: 'blur(0)',
-            transform: 'translateY(0) scale(1.02) rotate(0deg)',
+            transform: 'translateY(-2%) scale(1.06) rotate(-1deg)',
+            animationTimingFunction: 'cubic-bezier(0.55, 0, 0.7, 1)',
           },
-          '58%': {
-            transform: 'translateY(0) scale(1.08, 0.82) rotate(2deg)',
+          '60%': {
+            transform: 'translateY(0) scale(1.10, 0.82) rotate(2deg)',
+            animationTimingFunction: 'cubic-bezier(0.2, 0.4, 0.4, 1.6)',
           },
-          '72%': {
-            transform: 'translateY(-3%) scale(1.03) rotate(-1deg)',
+          '78%': {
+            transform: 'translateY(-2%) scale(1.03) rotate(-1deg)',
+            animationTimingFunction: 'cubic-bezier(0.4, 0, 0.4, 1)',
           },
           '100%': { transform: 'translateY(0) scale(1) rotate(0)' },
         },
@@ -55,8 +59,7 @@ export default {
         },
       },
       animation: {
-        'stamp-press':
-          'stamp-press 720ms cubic-bezier(0.45, 0, 0.25, 1.2) both',
+        'stamp-press': 'stamp-press 640ms linear both',
         'ink-splat':
           'ink-splat 720ms cubic-bezier(0.2, 0.6, 0.3, 1) forwards',
         'grid-shake': 'grid-shake 220ms ease-out',
