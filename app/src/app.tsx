@@ -18,6 +18,9 @@ export function App() {
     if (outcome.kind === 'collected') {
       setJustCollected(outcome.id)
       setToast(`+1 ${tr.stamps[outcome.id]}`)
+      if (typeof navigator.vibrate === 'function') {
+        navigator.vibrate([18, 30, 12])
+      }
       setTimeout(() => setJustCollected(null), 1800)
       setTimeout(() => setToast(null), 2200)
     } else if (outcome.kind === 'already') {

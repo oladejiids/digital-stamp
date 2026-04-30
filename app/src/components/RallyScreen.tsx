@@ -32,11 +32,22 @@ export function RallyScreen({ justCollectedId }: Props) {
         <h1 class="font-display text-3xl sm:text-4xl font-black text-ink tracking-tight mt-2 mb-1">
           {tr.title}
         </h1>
-        <div class="text-sm text-black/60 mb-6">
+        <div
+          class={[
+            'text-sm text-black/60 mb-6 origin-center',
+            justCollectedId ? 'animate-count-pulse' : '',
+          ].join(' ')}
+          key={count}
+        >
           {tr.progress(count, total)}
         </div>
 
-        <div class="w-full max-w-md grid grid-cols-3 gap-3 sm:gap-4 mb-8">
+        <div
+          class={[
+            'w-full max-w-md grid grid-cols-3 gap-3 sm:gap-4 mb-8',
+            justCollectedId ? 'animate-grid-shake' : '',
+          ].join(' ')}
+        >
           {STAMPS.map((s) => (
             <StampSlot
               key={s.id}
